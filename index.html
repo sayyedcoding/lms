@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KanbanFlow - Project Management App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray: #adb5bd;
+            --success: #4cc9f0;
+            --warning: #f9c74f;
+            --error: #f94144;
+            --todo: #ff6b6b;
+            --progress: #ffd166;
+            --done: #06d6a0;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--light);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 20px 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .logo i {
+            font-size: 28px;
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .logo-text span {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0 15px;
+        }
+
+        .nav-links li {
+            margin-bottom: 5px;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--light);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(67, 97, 238, 0.2);
+            color: var(--primary);
+        }
+
+        .nav-links i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .workspace-header {
+            padding: 20px 20px 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .workspace-header i {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .workspace-header i:hover {
+            color: var(--primary);
+        }
+
+        .workspace-list {
+            padding: 0 15px;
+            list-style: none;
+        }
+
+        .workspace-list li {
+            margin-bottom: 5px;
+        }
+
+        .workspace-list a {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .workspace-list a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
+        }
+
+        .workspace-list i {
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            width: 300px;
+        }
+
+        .search-box i {
+            color: var(--gray);
+            margin-right: 10px;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: var(--light);
+            width: 100%;
+            outline: none;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+            border: 2px solid var(--primary);
+        }
+
+        .notification {
+            position: relative;
+            margin-right: 20px;
+            cursor: pointer;
+        }
+
+        .notification i {
+            font-size: 20px;
+            color: var(--gray);
+            transition: all 0.3s;
+        }
+
+        .notification:hover i {
+            color: var(--primary);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent);
+            color: white;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Kanban Board Styles */
+        .kanban-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+
+        .kanban-column {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px;
+            padding: 15px;
+            min-width: 300px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .column-title {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .column-title i {
+            margin-right: 8px;
+        }
+
+        .todo .column-title i {
+            color: var(--todo);
+        }
+
+        .progress .column-title i {
+            color: var(--progress);
+        }
+
+        .done .column-title i {
+            color: var(--done);
+        }
+
+        .task-count {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--gray);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .task-list {
+            min-height: 100px;
+        }
+
+        .task-card {
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: grab;
+            border-left: 4px solid var(--primary);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .task-card h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .task-card p {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 12px;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .task-assignee {
+            display: flex;
+            align-items: center;
+        }
+
+        .task-assignee img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 5px;
+            border: 1px solid var(--primary);
+        }
+
+        .task-priority {
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .priority-high {
+            background: rgba(249, 65, 68, 0.2);
+            color: var(--error);
+        }
+
+        .priority-medium {
+            background: rgba(249, 199, 79, 0.2);
+            color: var(--warning);
+        }
+
+        .priority-low {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+
+        .add-task-btn {
+            display: flex;
+            align-items: center;
+            color: var(--gray);
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .add-task-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+
+        .add-task-btn i {
+            margin-right: 5px;
+        }
+
+        /* Chat Panel Styles */
+        .chat-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(67, 97, 238, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+        }
+
+        .chat-header h3 {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+        }
+
+        .chat-header i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        .chat-toggle {
+            cursor: pointer;
+        }
+
+        .chat-body {
+            height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message-incoming {
+            background: rgba(67, 97, 238, 0.2);
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+        }
+
+        .message-outgoing {
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        .chat-footer {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-footer input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            color: var(--light);
+            outline: none;
+        }
+
+        .chat-footer button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chat-footer button:hover {
+            background: var(--secondary);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--error);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--light);
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: visible;
+            }
+            
+            .logo-text, .nav-links span, .workspace-header span {
+                display: none;
+            }
+            
+            .logo {
+                justify-content: center;
+                padding: 15px 0;
+            }
+            
+            .logo i {
+                margin-right: 0;
+                font-size: 24px;
+            }
+            
+            .nav-links a, .workspace-list a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .nav-links i, .workspace-list i {
+                margin-right: 0;
+                font-size: 20px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kanban-column {
+                min-width: 250px;
+            flex: 1;
+            margin-bottom: 20px;
+            min-height: 400px;
+            display: flex;
+                flex-direction: column;
+            }
+            
+            .kanban-container {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                width: 200px;
+            }
+            
+            .chat-panel {
+                width: 300px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 0;
+                padding: 0;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                width: var(--sidebar-width);
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .kanban-column {
+                min-width: 100%;
+            }
+            
+            .chat-panel {
+                width: calc(100% - 40px);
+                right: 10px;
+                bottom: 10px;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+        }
+
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 576px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        /* Drag and drop styles */
+        .task-card.dragging {
+            opacity: 0.5;
+            border: 2px dashed var(--primary);
+        }
+
+        .kanban-column.drop-zone {
+            background: rgba(67, 97, 238, 0.1);
+            border: 2px dashed var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fas fa-tasks"></i>
+            <div class="logo-text">Kanban<span>Flow</span></div>
+        </div>
+        
+        <ul class="nav-links">
+            <li><a href="#" class="active"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+            <li><a href="#"><i class="fas fa-project-diagram"></i> <span>Projects</span></a></li>
+            <li><a href="#"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></a></li>
+            <li><a href="#"><i class="fas fa-check-circle"></i> <span>Tasks</span></a></li>
+            <li><a href="#"><i class="fas fa-users"></i> <span>Team</span></a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+        </ul>
+        
+        <div class="workspace-header">
+            <span>Workspaces</span>
+            <i class="fas fa-plus" id="addWorkspaceBtn"></i>
+        </div>
+        
+        <ul class="workspace-list">
+            <li><a href="#"><i class="fas fa-briefcase"></i> <span>Development</span></a></li>
+            <li><a href="#"><i class="fas fa-briefcase"></i> <span>Marketing</span></a></li>
+            <li><a href="#"><i class="fas fa-briefcase"></i> <span>Design</span></a></li>
+            <li><a href="#"><i class="fas fa-briefcase"></i> <span>Operations</span></a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="header">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search tasks, projects, or team members...">
+            </div>
+            
+            <div class="user-menu">
+                <div class="notification">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="User">
+            </div>
+        </div>
+        
+        <!-- Kanban Board -->
+        <div class="kanban-container">
+            <!-- To Do Column -->
+            <div class="kanban-column todo" data-status="todo">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h2>To Do</h2>
+                    </div>
+                    <span class="task-count">4</span>
+                </div>
+                
+                <div class="task-list" id="todo-tasks">
+                    <div class="task-card" draggable="true" data-task-id="1">
+                        <h3>Design User Authentication Flow</h3>
+                        <p>Create wireframes and mockups for login and registration process</p>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Assignee">
+                                <span>Sarah</span>
+                            </div>
+                            <span class="task-priority priority-high">High</span>
+                        </div>
+                    </div>
+                    
+                    <div class="task-card" draggable="true" data-task-id="2">
+                        <h3>Research Competitor Products</h3>
+                        <p>Analyze features and UX of similar project management tools</p>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Assignee">
+                                <span>Michael</span>
+                            </div>
+                            <span class="task-priority priority-medium">Medium</span>
+                        </div>
+                    </div>
+                    
+                    <div class="task-card" draggable="true" data-task-id="3">
+                        <h3>Setup Development Environment</h3>
+                        <p>Install required packages and configure the development server</p>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <img src="https://images.unsplash.com/photo-1619895862022-09114b41f16f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Assignee">
+                                <span>Jessica</span>
+                            </div>
+                            <span class="task-priority priority-low">Low</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="add-task-btn" data-status="todo">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Task</span>
+                </div>
+            </div>
+            
+            <!-- In Progress Column -->
+            <div class="kanban-column progress" data-status="inProgress">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-spinner"></i>
+                        <h2>In Progress</h2>
+                    </div>
+                    <span class="task-count">3</span>
+                </div>
+                
+                <div class="task-list" id="progress-tasks">
+                    <div class="task-card" draggable="true" data-task-id="4">
+                        <h3>Implement Drag & Drop Functionality</h3>
+                        <p>Add ability to move tasks between columns with smooth animations</p>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Assignee">
+                                <span>David</span>
+                            </div>
+                            <span class="task-priority priority-high">High</span>
+                        </div>
+                    </div>
+                    
+                    <div class="task-card" draggable="true" data-task-id="5">
+                        <h3>Design Database Schema</h3>
+                        <p>Create MongoDB models for users, tasks, and workspaces</p>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Assignee">
+                                <span>Alex</span>
+                            </div>
+                            <span class="task-priority priority-medium">Medium</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="add-task-btn" data-status="inProgress">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Task</span>
+                </div>
+            </div>
+            
+            <!-- Done Column -->
+            <div class="kanban-column done" data-status="done">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-check-circle"></i>
+                        <h2>Done</h2>
+                    </div>
+                    <span class="task-count">2</span>
+                </div>
+                
+                <div class="task-list" id="done-tasks">
+                    <div class="task-card" draggable="true" data-task-id="6">
+                        <h3>Create Project Wireframes</h3>
+                        <p>Design initial mockups for the Kanban board interface</p>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <img src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Assignee">
+                                <span>Sophia</span>
+                            </div>
+                            <span class="task-priority priority-low">Low</span>
+                        </div>
+                    </div>
+                    
+                    <div class="task-card" draggable="true" data-task-id="7">
+                        <h3>Setup Version Control</h3>
+                        <p>Initialize Git repository and setup branching strategy</p>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Assignee">
+                                <span>Emma</span>
+                            </div>
+                            <span class="task-priority priority-low">Low</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="add-task-btn" data-status="done">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Task</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Chat Panel -->
+    <div class="chat-panel">
+        <div class="chat-header">
+            <h3><i class="fas fa-comments"></i> Team Chat</h3>
+            <div class="chat-toggle"><i class="fas fa-minus"></i></div>
+        </div>
+        
+        <div class="chat-body">
+            <div class="message message-incoming">
+                <div class="message-sender">Sarah Johnson</div>
+                <div class="message-content">Hey team, I've finished the initial designs for the authentication flow. Can everyone take a look and share feedback?</div>
+            </div>
+            
+            <div class="message message-outgoing">
+                <div class="message-sender">You</div>
+                <div class="message-content">Looks great Sarah! I especially like the clean login form design.</div>
+            </div>
+            
+            <div class="message message-incoming">
+                <div class="message-sender">Michael Chen</div>
+                <div class="message-content">I've added some research findings to the shared document. The competitor analysis section is now complete.</div>
+            </div>
+            
+            <div class="message message-incoming">
+                <div class="message-sender">David Wilson</div>
+                <div class="message-content">The drag and drop functionality is almost ready. I'm just working on the animations to make it smoother.</div>
+            </div>
+            
+            <div class="message message-outgoing">
+                <div class="message-sender">You</div>
+                <div class="message-content">That's awesome David! Can't wait to try it out.</div>
+            </div>
+        </div>
+        
+        <div class="chat-footer">
+            <input type="text" placeholder="Type a message...">
+            <button><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Task</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="taskForm">
+                <div class="form-group">
+                    <label for="taskTitle">Task Title</label>
+                    <input type="text" id="taskTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="taskAssignee">Assign To</label>
+                    <select id="taskAssignee">
+                        <option value="1">Sarah Johnson</option>
+                        <option value="2">Michael Chen</option>
+                        <option value="3">David Wilson</option>
+                        <option value="4">Jessica Brown</option>
+                        <option value="5">Alex Taylor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="taskPriority">Priority</label>
+                    <select id="taskPriority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="taskDueDate">Due Date</label>
+                    <input type="date" id="taskDueDate">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelTask">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const taskModal = document.getElementById('taskModal');
+        const taskForm = document.getElementById('taskForm');
+        const cancelTaskBtn = document.getElementById('cancelTask');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const addTaskButtons = document.querySelectorAll('.add-task-btn');
+        const chatToggle = document.querySelector('.chat-toggle');
+        const chatBody = document.querySelector('.chat-body');
+        const chatInput = document.querySelector('.chat-footer input');
+        const chatSendBtn = document.querySelector('.chat-footer button');
+        const kanbanColumns = document.querySelectorAll('.kanban-column');
+        const taskCards = document.querySelectorAll('.task-card');
+
+        // Mobile menu toggle
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 576 && 
+                !sidebar.contains(e.target) && 
+                !mobileMenuBtn.contains(e.target) &&
+                sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Add Task Modal
+        addTaskButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                taskModal.style.display = 'flex';
+            });
+        });
+
+        // Close modal
+        const closeModal = () => {
+            taskModal.style.display = 'none';
+        };
+
+        cancelTaskBtn.addEventListener('click', closeModal);
+        closeModalBtn.addEventListener('click', closeModal);
+
+        // Close modal when clicking outside
+        taskModal.addEventListener('click', (e) => {
+            if (e.target === taskModal) {
+                closeModal();
+            }
+        });
+
+        // Task form submission
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Get form values
+            const title = document.getElementById('taskTitle').value;
+            const description = document.getElementById('taskDescription').value;
+            const assignee = document.getElementById('taskAssignee');
+            const assigneeName = assignee.options[assignee.selectedIndex].text;
+            const priority = document.getElementById('taskPriority').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            
+            // Create new task (in a real app, this would be sent to the backend)
+            const newTaskId = Math.floor(Math.random() * 1000);
+            const status = document.querySelector('.add-task-btn.active').dataset.status;
+            
+            // Create task card HTML
+            const taskCard = document.createElement('div');
+            taskCard.className = 'task-card';
+            taskCard.draggable = true;
+            taskCard.dataset.taskId = newTaskId;
+            
+            taskCard.innerHTML = `
+                <h3>${title}</h3>
+                <p>${description}</p>
+                <div class="task-meta">
+                    <div class="task-assignee">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Assignee">
+                        <span>${assigneeName}</span>
+                    </div>
+                    <span class="task-priority priority-${priority}">${priority.charAt(0).toUpperCase() + priority.slice(1)}</span>
+                </div>
+            `;
+            
+            // Add to the appropriate column
+            document.querySelector(`#${status}-tasks`).appendChild(taskCard);
+            
+            // Update task count
+            updateTaskCount(status);
+            
+            // Initialize drag and drop for the new task
+            initDragAndDrop(taskCard);
+            
+            // Reset form and close modal
+            taskForm.reset();
+            closeModal();
+            
+            // Show confirmation message
+            alert('Task created successfully!');
+        });
+
+        // Track which column the add button was clicked in
+        addTaskButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                addTaskButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+
+        // Chat functionality
+        chatToggle.addEventListener('click', () => {
+            if (chatBody.style.display === 'none') {
+                chatBody.style.display = 'flex';
+                chatToggle.innerHTML = '<i class="fas fa-minus"></i>';
+            } else {
+                chatBody.style.display = 'none';
+                chatToggle.innerHTML = '<i class="fas fa-plus"></i>';
+            }
+        });
+        
+        chatSendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message message-outgoing';
+                messageElement.innerHTML = `
+                    <div class="message-sender">You</div>
+                    <div class="message-content">${message}</div>
+                `;
+                
+                chatBody.appendChild(messageElement);
+                chatInput.value = '';
+                
+                // Auto scroll to bottom
+                chatBody.scrollTop = chatBody.scrollHeight;
+                
+                // Simulate reply after a short delay
+                setTimeout(simulateReply, 1000);
+            }
+        }
+        
+        function simulateReply() {
+            const replies = [
+                "Thanks for the update!",
+                "I'll review that shortly.",
+                "Can we schedule a meeting to discuss this?",
+                "Great work everyone!",
+                "I've added my comments to the document."
+            ];
+            
+            const senders = ["Sarah Johnson", "Michael Chen", "David Wilson", "Jessica Brown"];
+            const randomSender = senders[Math.floor(Math.random() * senders.length)];
+            const randomReply = replies[Math.floor(Math.random() * replies.length)];
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message message-incoming';
+            messageElement.innerHTML = `
+                <div class="message-sender">${randomSender}</div>
+                <div class="message-content">${randomReply}</div>
+            `;
+            
+            chatBody.appendChild(messageElement);
+            
+            // Auto scroll to bottom
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Drag and Drop functionality
+        function initDragAndDrop(taskCard) {
+            taskCard.addEventListener('dragstart', () => {
+                taskCard.classList.add('dragging');
+                setTimeout(() => {
+                    taskCard.style.display = 'none';
+                }, 0);
+            });
+            
+            taskCard.addEventListener('dragend', () => {
+                taskCard.classList.remove('dragging');
+                taskCard.style.display = 'block';
+                
+                // Remove drop zone styling from all columns
+                kanbanColumns.forEach(column => {
+                    column.classList.remove('drop-zone');
+                });
+            });
+        }
+
+        // Initialize drag and drop for existing tasks
+        taskCards.forEach(initDragAndDrop);
+
+        // Set up drop zones for columns
+        kanbanColumns.forEach(column => {
+            column.addEventListener('dragover', e => {
+                e.preventDefault();
+                column.classList.add('drop-zone');
+            });
+            
+            column.addEventListener('dragleave', () => {
+                column.classList.remove('drop-zone');
+            });
+            
+            column.addEventListener('drop', e => {
+                e.preventDefault();
+                const taskId = e.dataTransfer.getData('text/plain');
+                const draggedTask = document.querySelector(`[data-task-id="${taskId}"]`);
+                
+                if (draggedTask) {
+                    const taskList = column.querySelector('.task-list');
+                    taskList.appendChild(draggedTask);
+                    
+                    // Update task count
+                    const oldStatus = draggedTask.dataset.status;
+                    const newStatus = column.dataset.status;
+                    
+                    updateTaskCount(oldStatus);
+                    updateTaskCount(newStatus);
+                    
+                    // Update task status
+                    draggedTask.dataset.status = newStatus;
+                    
+                    // In a real app, you would send an API request to update the task status
+                    console.log(`Task ${taskId} moved to ${newStatus}`);
+                }
+                
+                column.classList.remove('drop-zone');
+            });
+        });
+
+        // Update task count for a column
+        function updateTaskCount(status) {
+            const taskList = document.querySelector(`#${status}-tasks`);
+            const taskCount = taskList.querySelectorAll('.task-card').length;
+            document.querySelector(`.kanban-column[data-status="${status}"] .task-count`).textContent = taskCount;
+        }
+
+        // Set data transfer for drag and drop
+        document.addEventListener('dragstart', e => {
+            if (e.target.classList.contains('task-card')) {
+                e.dataTransfer.setData('text/plain', e.target.dataset.taskId);
+            }
+        });
+
+        // Add Workspace button
+        document.getElementById('addWorkspaceBtn').addEventListener('click', () => {
+            alert('Add new workspace functionality would open here');
+        });
+
+        // Notification button
+        document.querySelector('.notification').addEventListener('click', () => {
+            alert('Notifications panel would open here');
+        });
+    </script>
+</body>
+</html>
