@@ -1,0 +1,22 @@
+asgiref==3.7.2
+certifi==2024.2.2
+charset-normalizer==3.3.2
+Django==5.0.4
+django-debug-toolbar==4.3.0
+django-jazzmin==2.6.0
+-e git+http://github.com/ouhouhsami/django-progressbarupload.git@cc79bffd78c4759e28b22a989688f5ca7057137f#egg=django_progressbarupload
+djangorestframework==3.14.0
+idna==3.7
+pillow==10.2.0
+psycopg==3.1.18
+psycopg-binary==3.1.18
+psycopg2-binary==2.8.2
+Pygments==2.17.2
+python-dateutil==2.8.2
+pytz==2024.1
+razorpay==1.4.2
+requests==2.31.0
+six==1.12.0
+sqlparse==0.4.4
+typing_extensions==4.9.0
+urllib3==2.2.1
